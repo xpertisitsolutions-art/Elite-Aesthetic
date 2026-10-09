@@ -1,8 +1,72 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
+# Logs
+logs
 *.log
-.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+
+# Coverage
+coverage
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Keep example env file
 !.env.example
+
+# Vite
+.vite
+
+# TypeScript
+*.tsbuildinfo
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+
+# Supabase local development
+supabase/.branches
+supabase/.temp
+supabase/.cache
+
+# Generated database types (optional)
+database.types.ts
+
+# Netlify
+.netlify
+
+# Vercel
+.vercel
+
+# Turbo
+.turbo
+
+# ESLint cache
+.eslintcache
+
+# Misc temporary files
+tmp
+temp
+*.tmp
+
+# Firebase (if ever added)
+.firebase
+
+# Local SSL certificates
+*.pem
+*.key
