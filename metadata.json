@@ -1,0 +1,6 @@
+{
+  "name": "Elite Aesthetics Cebu",
+  "description": "Elite Aesthetics Cebu is an aesthetic and wellness clinic in Cebu City, Philippines. Explore personalized aesthetic treatments and schedule your consultation at The Ridges Commercial Center.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

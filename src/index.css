@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --color-champagne-50: #fbf9f5;
+  --color-champagne-100: #f5eee4;
+  --color-champagne-200: #ebdcc8;
+  --color-champagne-300: #dbc3a3;
+  --color-champagne-400: #c9a77e;
+  --color-champagne-500: #b89358;
+  --color-champagne-600: #9e7a42;
+  --color-champagne-700: #7e5f32;
+  --color-espresso-950: #14100e;
+  --color-espresso-900: #1d1815;
+  --color-espresso-800: #29221e;
+  --color-espresso-700: #3c332d;
+  --color-cream-base: #faf7f2;
+  --color-cream-card: #fdfbf9;
+  --color-cream-muted: #f3ede4;
+  --color-cream-border: #e7dfd3;
+}
+
+/* Stable Root Viewport Coordinate System */
+html {
+  font-family: var(--font-sans);
+  color: var(--color-espresso-900);
+  background-color: var(--color-cream-base);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Subtle luxury grain / subtle shimmer */
+.luxury-gold-border {
+  border: 1px solid rgba(184, 147, 88, 0.25);
+}
+
+.luxury-card-shadow {
+  box-shadow: 0 4px 24px -2px rgba(41, 34, 30, 0.04), 0 1px 3px 0 rgba(41, 34, 30, 0.02);
+}
+
+.luxury-card-shadow-hover {
+  box-shadow: 0 12px 36px -4px rgba(41, 34, 30, 0.08), 0 2px 6px 0 rgba(41, 34, 30, 0.03);
+}
