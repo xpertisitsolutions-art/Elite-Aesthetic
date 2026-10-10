@@ -23,7 +23,7 @@ coverage
 .env.test.local
 .env.production.local
 
-# Keep example env file
+# Keep example env files
 !.env.example
 
 # Vite
