@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useRouter } from '../router/Router';
 import { getBreadcrumbsForPath } from '../data/navigationData';
 import { CLINIC_INFO } from '../data/clinicData';
+import { submitInquiry } from '../lib/submitInquiry';
 import { VisualAsset } from '../components/VisualAsset';
 import {
   SectionBackground,
@@ -49,11 +50,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
   // Form Validation & Status
   const [errors, setErrors] = useState<{ fullName?: string; mobileNumber?: string }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Micro-FAQ State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { fullName?: string; mobileNumber?: string } = {};
 
@@ -73,6 +76,21 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
     }
 
     setErrors({});
+    setSubmitError('');
+    setIsSubmitting(true);
+    const result = await submitInquiry({
+      source: 'contact',
+      full_name: fullName,
+      phone: mobileNumber,
+      email: emailAddress,
+      interest: inquiryType,
+      message,
+    });
+    setIsSubmitting(false);
+    if (!result.ok) {
+      setSubmitError('We could not send your inquiry. Please try again or contact the clinic by phone.');
+      return;
+    }
     setIsSubmitted(true);
   };
 
@@ -83,6 +101,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
     setInquiryType('General Inquiry');
     setMessage('');
     setErrors({});
+    setSubmitError('');
     setIsSubmitted(false);
   };
 
@@ -488,12 +507,14 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
 
                 {/* Submit Action */}
                 <div>
+                  {submitError && <p role="alert" className="mb-3 text-sm text-[#B85858]">{submitError}</p>}
                   <button
                     type="submit"
+                    disabled={isSubmitting}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-xs font-semibold tracking-wider uppercase text-[#FAF7F2] bg-[#241D18] hover:bg-[#9E7A42] transition-colors focus:outline-none shadow-sm cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Send Inquiry</span>
+                    <span>{isSubmitting ? 'Sending…' : 'Send Inquiry'}</span>
                   </button>
                 </div>
 

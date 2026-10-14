@@ -10,6 +10,7 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from '../router/Router';
 import { getBreadcrumbsForPath } from '../data/navigationData';
 import { DETAILED_TREATMENT_CATEGORIES, DetailedTreatmentCategory } from '../data/treatmentsData';
+import { submitInquiry } from '../lib/submitInquiry';
 import { VisualAsset } from '../components/VisualAsset';
 import {
   SectionBackground,
@@ -52,6 +53,8 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
   // Form Validation & Status
   const [errors, setErrors] = useState<{ fullName?: string; mobileNumber?: string }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Micro-FAQ State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -60,7 +63,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { fullName?: string; mobileNumber?: string } = {};
 
@@ -80,6 +83,23 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
     }
 
     setErrors({});
+    setSubmitError('');
+    setIsSubmitting(true);
+    const result = await submitInquiry({
+      source: 'book-consultation',
+      full_name: fullName,
+      phone: mobileNumber,
+      email: emailAddress,
+      interest: areaOfInterest,
+      message,
+      preferred_contact_method: preferredContactMethod,
+      preferred_timing: preferredTiming,
+    });
+    setIsSubmitting(false);
+    if (!result.ok) {
+      setSubmitError('We could not send your request. Please try again or contact the clinic by phone.');
+      return;
+    }
     setIsSubmitted(true);
   };
 
@@ -92,6 +112,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
     setPreferredContactMethod('Phone');
     setPreferredTiming('No Preference');
     setErrors({});
+    setSubmitError('');
     setIsSubmitted(false);
   };
 
@@ -558,12 +579,14 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
 
                   {/* Submit Action */}
                   <div>
+                    {submitError && <p role="alert" className="mb-3 text-sm text-[#B85858]">{submitError}</p>}
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-xs font-semibold tracking-wider uppercase text-[#FAF7F2] bg-[#241D18] hover:bg-[#9E7A42] transition-colors focus:outline-none shadow-sm cursor-pointer"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      <span>Request a Consultation</span>
+                      <span>{isSubmitting ? 'Sending…' : 'Request a Consultation'}</span>
                     </button>
                   </div>
 

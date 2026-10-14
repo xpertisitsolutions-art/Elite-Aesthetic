@@ -43,6 +43,7 @@ Thumbs.db
 supabase/.branches
 supabase/.temp
 supabase/.cache
+history.db
 
 # Generated database types (optional)
 database.types.ts
@@ -70,3 +71,8 @@ temp
 # Local SSL certificates
 *.pem
 *.key
+
+# Local context files
+Elite_Aesthetics_Xpertis_Development_Control_Workbook_v1.0.xlsx
+ELITE AESTHETICS - PRB-00 — Project Readiness & Developer Entry Gate.pdf
+ELITE AESTHETICS CEBU - Developer Scoping & Technical Handover Document.pdf

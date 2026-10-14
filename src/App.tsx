@@ -4,32 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import { RouterProvider, useRouter } from './router/Router';
+import { RouterProvider } from './router/Router';
+import { AppRoutes } from './router/AppRoutes';
 import { AppShell } from './components/AppShell';
-
-// Homepage Components (Locked from Prompt #1.11)
-import { Hero } from './components/Hero';
-import { IntroductionSection } from './components/IntroductionSection';
-import { TreatmentCategories } from './components/TreatmentCategories';
-import { WhyEliteAesthetics } from './components/WhyEliteAesthetics';
-import { FeaturedTreatments } from './components/FeaturedTreatments';
-import { RealResultsPreview } from './components/RealResultsPreview';
-import { DoctorExpertisePreview } from './components/DoctorExpertisePreview';
-import { TestimonialsSection } from './components/testimonials/TestimonialsSection';
-import { AppointmentCTA } from './components/AppointmentCTA';
-import { LocationContactPreview } from './components/LocationContactPreview';
-
-// Subpage Route Components (Prompt #3 Foundation)
-import { AboutPage } from './pages/AboutPage';
-import { TreatmentsPage } from './pages/TreatmentsPage';
-import { TreatmentCategoryPage } from './pages/TreatmentCategoryPage';
-import { PromotionsPage } from './pages/PromotionsPage';
-import { ResultsPage } from './pages/ResultsPage';
-import { FaqPage } from './pages/FaqPage';
-import { ContactPage } from './pages/ContactPage';
-import { BookConsultationPage } from './pages/BookConsultationPage';
-import { ClientExperiencesPage } from './pages/ClientExperiencesPage';
-import { NotFoundPage } from './pages/NotFoundPage';
 
 // Shared Modals & Data
 import { AppointmentModal } from './components/AppointmentModal';
@@ -39,11 +16,9 @@ import { PromotionsModal } from './components/PromotionsModal';
 import { FaqModal } from './components/FaqModal';
 import { ResultsGalleryModal } from './components/ResultsGalleryModal';
 import { ChatLauncher } from './components/chat/ChatLauncher';
-import { FeaturedTreatment, TreatmentCategory } from './data/clinicData';
+import type { FeaturedTreatment, TreatmentCategory } from './data/clinicData';
 
 function AppContent() {
-  const { pathname, navigate } = useRouter();
-
   // Modal states
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedBookingTreatment, setSelectedBookingTreatment] = useState<string>('');
@@ -77,121 +52,19 @@ function AppContent() {
     setDetailModalOpen(true);
   };
 
-  // Route selector
-  const renderCurrentRoute = () => {
-    const normalized = pathname.replace(/\/+$/, '') || '/';
-
-    if (normalized === '/') {
-      return (
-        <>
-          {/* Hero Section */}
-          <Hero
-            onOpenBooking={() => handleOpenBooking()}
-            onExploreTreatments={() => navigate('/treatments')}
-          />
-
-          {/* Introduction Section ("Glow Into Your Best Self") */}
-          <IntroductionSection
-            onDiscover={() => navigate('/treatments')}
-            onOpenBooking={() => handleOpenBooking('Physician Consultation')}
-          />
-
-          {/* Treatment Categories (8 Categories) */}
-          <TreatmentCategories
-            onSelectCategory={handleSelectCategory}
-            onOpenBookingForCategory={(categoryName) => handleOpenBooking(categoryName)}
-          />
-
-          {/* Why Elite Aesthetics (4 Pillars) */}
-          <WhyEliteAesthetics />
-
-          {/* Featured Treatments (Hydrafacial, CO₂ Laser, Botox, Fillers, Emsculpt, PRP) */}
-          <FeaturedTreatments
-            onLearnMore={handleLearnMoreTreatment}
-            onBookTreatment={(treatmentName) => handleOpenBooking(treatmentName)}
-          />
-
-          {/* Real Results Preview */}
-          <RealResultsPreview
-            onViewResults={() => setResultsModalOpen(true)}
-            onOpenBooking={() => handleOpenBooking('Skin Assessment & Treatment Plan')}
-          />
-
-          {/* Doctor / Expertise Preview */}
-          <DoctorExpertisePreview
-            onMeetDoctors={() => setDoctorModalOpen(true)}
-            onOpenBooking={() => handleOpenBooking('Physician Consultation')}
-          />
-
-          {/* Client Experiences / Testimonials Section */}
-          <TestimonialsSection onOpenBooking={handleOpenBooking} />
-
-          {/* Appointment CTA */}
-          <AppointmentCTA
-            onOpenBooking={() => handleOpenBooking()}
-            onOpenContact={() => {
-              const el = document.getElementById('contact');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
-          />
-
-          {/* Location / Contact Preview */}
-          <LocationContactPreview onOpenBooking={() => handleOpenBooking()} />
-        </>
-      );
-    }
-
-    if (normalized === '/about' || normalized === '/team') {
-      return <AboutPage onOpenBooking={() => handleOpenBooking('Physician Consultation')} />;
-    }
-
-    if (normalized === '/treatments') {
-      return (
-        <TreatmentsPage
-          onOpenBooking={handleOpenBooking}
-          onLearnMoreTreatment={handleLearnMoreTreatment}
-        />
-      );
-    }
-
-    if (normalized.startsWith('/treatments/')) {
-      return <TreatmentCategoryPage onOpenBooking={handleOpenBooking} />;
-    }
-
-    if (normalized === '/promotions') {
-      return <PromotionsPage onOpenBooking={handleOpenBooking} />;
-    }
-
-    if (normalized === '/results') {
-      return <ResultsPage onOpenBooking={handleOpenBooking} />;
-    }
-
-    if (normalized === '/faq') {
-      return <FaqPage onOpenBooking={handleOpenBooking} />;
-    }
-
-    if (normalized === '/client-experiences') {
-      return <ClientExperiencesPage onOpenBooking={handleOpenBooking} />;
-    }
-
-    if (normalized === '/contact') {
-      return <ContactPage onOpenBooking={handleOpenBooking} />;
-    }
-
-    if (normalized === '/book-consultation') {
-      return <BookConsultationPage onOpenBookingModal={handleOpenBooking} />;
-    }
-
-    return <NotFoundPage onOpenBooking={() => handleOpenBooking()} />;
-  };
-
   return (
     <AppShell
       onOpenBooking={handleOpenBooking}
       onOpenPromotionModal={() => setPromotionsModalOpen(true)}
       onOpenFaqModal={() => setFaqModalOpen(true)}
     >
-      {renderCurrentRoute()}
+      <AppRoutes
+        onOpenBooking={handleOpenBooking}
+        onSelectCategory={handleSelectCategory}
+        onLearnMoreTreatment={handleLearnMoreTreatment}
+        onViewResults={() => setResultsModalOpen(true)}
+        onMeetDoctors={() => setDoctorModalOpen(true)}
+      />
 
       {/* Global Interactive Modals (Accessible Across All Routes) */}
       <AppointmentModal

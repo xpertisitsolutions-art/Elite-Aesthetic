@@ -3,6 +3,7 @@ import { X, Calendar, CheckCircle2, Phone, MapPin, Copy, Check, Info } from 'luc
 import { CLINIC_INFO, TREATMENT_CATEGORIES, FEATURED_TREATMENTS } from '../data/clinicData';
 import { EliteAestheticsLogo } from './EliteAestheticsLogo';
 import { ModalOverlay } from './ui/ModalOverlay';
+import { submitInquiry } from '../lib/submitInquiry';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ fullName?: string; phoneNumber?: string }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [copied, setCopied] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +36,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
     }
   }, [preselectedTreatment]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { fullName?: string; phoneNumber?: string } = {};
 
@@ -53,6 +56,22 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
     }
 
     setErrors({});
+    setSubmitError('');
+    setIsSubmitting(true);
+    const result = await submitInquiry({
+      source: 'modal',
+      full_name: fullName,
+      phone: phoneNumber,
+      email,
+      interest: selectedService,
+      message: notes,
+      preferred_timing: preferredWindow,
+    });
+    setIsSubmitting(false);
+    if (!result.ok) {
+      setSubmitError('We could not send your request. Please try again or call the clinic.');
+      return;
+    }
     setIsSubmitted(true);
   };
 
@@ -65,6 +84,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
   const resetForm = () => {
     setIsSubmitted(false);
+    setSubmitError('');
     setFullName('');
     setPhoneNumber('');
     setEmail('');
@@ -173,6 +193,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate className="space-y-4 text-left">
+              {submitError && <p role="alert" className="text-sm text-[#B85858]">{submitError}</p>}
               <div className="bg-[#FAF7F2] p-3 border border-[#E7DFD3] flex items-center gap-2 text-xs text-[#685B52]">
                 <MapPin className="w-4 h-4 text-[#B89358] shrink-0" />
                 <span>The Ridges Commercial Center, F. Cabahug Street, Kasambagan, Cebu City</span>
@@ -311,9 +332,10 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <div className="pt-2">
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full py-3.5 px-6 text-xs font-semibold tracking-[0.16em] uppercase text-[#FAF7F2] bg-[#241D18] hover:bg-[#9E7A42] border border-[#B89358]/50 shadow-xs transition-colors focus:outline-none cursor-pointer"
                 >
-                  REQUEST A CONSULTATION
+                  {isSubmitting ? 'SENDING…' : 'REQUEST A CONSULTATION'}
                 </button>
                 <div className="mt-3 pt-2 border-t border-[#E7DFD3]/60 flex items-start gap-2 text-[11px] text-[#736055] leading-relaxed italic">
                   <Info className="w-3.5 h-3.5 text-[#9E7A42] shrink-0 mt-0.5" />
