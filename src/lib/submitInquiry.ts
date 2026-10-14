@@ -10,6 +10,8 @@ export interface InquiryInput {
   message?: string;
   preferred_contact_method?: string;
   preferred_timing?: string;
+  preferred_date?: string;
+  preferred_time?: string;
 }
 
 export async function submitInquiry(
@@ -27,6 +29,8 @@ export async function submitInquiry(
         input.preferred_contact_method?.trim() || null,
       preferred_timing:
         input.preferred_timing?.trim() || null,
+      preferred_date: input.preferred_date?.trim() || null,
+      preferred_time: input.preferred_time?.trim() || null,
     };
 
     const { error } = await supabase
