@@ -398,6 +398,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
                     <input
                       id="full-name"
                       type="text"
+                      maxLength={120}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="e.g. Maria Santos"
@@ -426,6 +427,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
                     <input
                       id="mobile-number"
                       type="tel"
+                      maxLength={30}
                       value={mobileNumber}
                       onChange={(e) => setMobileNumber(e.target.value)}
                       placeholder="e.g. 0917 123 4567"
@@ -456,6 +458,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
                     <input
                       id="email-address"
                       type="email"
+                      maxLength={200}
                       value={emailAddress}
                       onChange={(e) => setEmailAddress(e.target.value)}
                       placeholder="e.g. name@example.com"
@@ -498,6 +501,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking }) => {
                   <textarea
                     id="message"
                     rows={4}
+                    maxLength={2000}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Tell us what you'd like to know or what you'd like to discuss."

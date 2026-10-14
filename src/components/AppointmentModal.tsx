@@ -4,6 +4,7 @@ import { CLINIC_INFO, TREATMENT_CATEGORIES, FEATURED_TREATMENTS } from '../data/
 import { EliteAestheticsLogo } from './EliteAestheticsLogo';
 import { ModalOverlay } from './ui/ModalOverlay';
 import { submitInquiry } from '../lib/submitInquiry';
+import { getClinicToday } from '../lib/clinicDate';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -21,8 +22,15 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const [email, setEmail] = useState('');
   const [selectedService, setSelectedService] = useState(preselectedTreatment || 'General Consultation');
   const [preferredWindow, setPreferredWindow] = useState('No Preference');
+  const [preferredDate, setPreferredDate] = useState('');
+  const [preferredTime, setPreferredTime] = useState('');
   const [notes, setNotes] = useState('');
-  const [errors, setErrors] = useState<{ fullName?: string; phoneNumber?: string }>({});
+  const [errors, setErrors] = useState<{
+    fullName?: string;
+    phoneNumber?: string;
+    preferredDate?: string;
+    preferredTime?: string;
+  }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -38,7 +46,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { fullName?: string; phoneNumber?: string } = {};
+    const newErrors: typeof errors = {};
 
     if (!fullName.trim()) {
       newErrors.fullName = 'Please enter your full name.';
@@ -48,6 +56,16 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
       newErrors.phoneNumber = 'Please enter your contact phone number.';
     } else if (phoneNumber.trim().length < 7) {
       newErrors.phoneNumber = 'Please enter a valid telephone or mobile number.';
+    }
+
+    if (!preferredDate) {
+      newErrors.preferredDate = 'Please choose a preferred appointment date.';
+    } else if (preferredDate < getClinicToday()) {
+      newErrors.preferredDate = 'Please choose today or a future date in Cebu time.';
+    }
+
+    if (!preferredTime) {
+      newErrors.preferredTime = 'Please choose a preferred appointment time.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -66,6 +84,8 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
       interest: selectedService,
       message: notes,
       preferred_timing: preferredWindow,
+      preferred_date: preferredDate,
+      preferred_time: preferredTime,
     });
     setIsSubmitting(false);
     if (!result.ok) {
@@ -76,7 +96,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
   };
 
   const handleCopySummary = () => {
-    const summary = `Consultation Request\nName: ${fullName}\nPhone: ${phoneNumber}\nService: ${selectedService}\nPreferred Contact Window: ${preferredWindow}\nClinic: Elite Aesthetics - Cebu (The Ridges Commercial Center)`;
+    const summary = `Consultation Request\nName: ${fullName}\nPhone: ${phoneNumber}\nService: ${selectedService}\nPreferred Appointment: ${preferredDate} at ${preferredTime} Cebu time (subject to confirmation)\nPreferred Contact Window: ${preferredWindow}\nClinic: Elite Aesthetics - Cebu (The Ridges Commercial Center)`;
     navigator.clipboard.writeText(summary);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -89,6 +109,8 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
     setPhoneNumber('');
     setEmail('');
     setNotes('');
+    setPreferredDate('');
+    setPreferredTime('');
     setErrors({});
     onClose();
   };
@@ -139,7 +161,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               </h3>
 
               <p className="text-xs sm:text-sm text-[#52453D] max-w-md mx-auto leading-relaxed mb-6">
-                Your consultation request for <strong>{selectedService}</strong> has been received through this website interface. The clinic can follow up using the contact details you provided to discuss scheduling and the next step.
+                Your request for <strong>{selectedService}</strong> on <strong>{preferredDate}</strong> at <strong>{preferredTime} Cebu time</strong> has been submitted for clinic review. The requested time is not confirmed until the clinic contacts you.
               </p>
 
               {/* Booking Summary Box */}
@@ -147,6 +169,10 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <div className="flex justify-between">
                   <span className="text-[#8C7667]">Selected Area:</span>
                   <span className="font-semibold text-[#1D1815]">{selectedService}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#8C7667]">Requested Appointment:</span>
+                  <span className="font-semibold text-[#1D1815]">{preferredDate} · {preferredTime} Cebu time</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8C7667]">Preferred Contact Window:</span>
@@ -207,6 +233,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <input
                   id="modal-full-name"
                   type="text"
+                  maxLength={120}
                   placeholder="e.g. Maria Santos"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -233,6 +260,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   <input
                     id="modal-phone"
                     type="tel"
+                    maxLength={30}
                     placeholder="0917 123 4567"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
@@ -257,6 +285,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   <input
                     id="modal-email"
                     type="email"
+                    maxLength={200}
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -295,6 +324,49 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 </select>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="modal-preferred-date" className="block text-xs font-semibold uppercase tracking-wider text-[#3C332D] mb-1.5">
+                    Preferred Appointment Date <span className="text-[#9E7A42]">*</span>
+                  </label>
+                  <input
+                    id="modal-preferred-date"
+                    type="date"
+                    min={getClinicToday()}
+                    value={preferredDate}
+                    onChange={(e) => {
+                      setPreferredDate(e.target.value);
+                      setErrors((current) => ({ ...current, preferredDate: undefined }));
+                    }}
+                    aria-required="true"
+                    aria-invalid={Boolean(errors.preferredDate)}
+                    aria-describedby={errors.preferredDate ? 'modal-preferred-date-error' : undefined}
+                    className={`w-full px-3.5 py-2.5 bg-white border text-sm text-[#1D1815] outline-none transition-colors ${errors.preferredDate ? 'border-[#B85858]' : 'border-[#E7DFD3] focus:border-[#B89358]'}`}
+                  />
+                  {errors.preferredDate && <p id="modal-preferred-date-error" className="mt-1 text-xs text-[#B85858]">{errors.preferredDate}</p>}
+                </div>
+                <div>
+                  <label htmlFor="modal-preferred-time" className="block text-xs font-semibold uppercase tracking-wider text-[#3C332D] mb-1.5">
+                    Preferred Appointment Time <span className="text-[#9E7A42]">*</span>
+                  </label>
+                  <input
+                    id="modal-preferred-time"
+                    type="time"
+                    value={preferredTime}
+                    onChange={(e) => {
+                      setPreferredTime(e.target.value);
+                      setErrors((current) => ({ ...current, preferredTime: undefined }));
+                    }}
+                    aria-required="true"
+                    aria-invalid={Boolean(errors.preferredTime)}
+                    aria-describedby={errors.preferredTime ? 'modal-preferred-time-error' : undefined}
+                    className={`w-full px-3.5 py-2.5 bg-white border text-sm text-[#1D1815] outline-none transition-colors ${errors.preferredTime ? 'border-[#B85858]' : 'border-[#E7DFD3] focus:border-[#B89358]'}`}
+                  />
+                  {errors.preferredTime && <p id="modal-preferred-time-error" className="mt-1 text-xs text-[#B85858]">{errors.preferredTime}</p>}
+                </div>
+              </div>
+              <p className="-mt-2 text-xs text-[#685B52]">Requested times use Cebu time (Asia/Manila) and require clinic confirmation.</p>
+
               {/* Preferred Contact Window */}
               <div>
                 <label htmlFor="modal-window" className="block text-xs font-semibold uppercase tracking-wider text-[#3C332D] mb-1.5">
@@ -321,6 +393,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <textarea
                   id="modal-notes"
                   rows={3}
+                  maxLength={2000}
                   placeholder="Share what you'd like to explore, what concerns you have, or what questions you have..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}

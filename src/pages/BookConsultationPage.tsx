@@ -11,6 +11,7 @@ import { useRouter } from '../router/Router';
 import { getBreadcrumbsForPath } from '../data/navigationData';
 import { DETAILED_TREATMENT_CATEGORIES, DetailedTreatmentCategory } from '../data/treatmentsData';
 import { submitInquiry } from '../lib/submitInquiry';
+import { getClinicToday } from '../lib/clinicDate';
 import { VisualAsset } from '../components/VisualAsset';
 import {
   SectionBackground,
@@ -49,9 +50,16 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
   const [message, setMessage] = useState('');
   const [preferredContactMethod, setPreferredContactMethod] = useState<'Phone' | 'SMS / Mobile' | 'Email'>('Phone');
   const [preferredTiming, setPreferredTiming] = useState('No Preference');
+  const [preferredDate, setPreferredDate] = useState('');
+  const [preferredTime, setPreferredTime] = useState('');
 
   // Form Validation & Status
-  const [errors, setErrors] = useState<{ fullName?: string; mobileNumber?: string }>({});
+  const [errors, setErrors] = useState<{
+    fullName?: string;
+    mobileNumber?: string;
+    preferredDate?: string;
+    preferredTime?: string;
+  }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -65,7 +73,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { fullName?: string; mobileNumber?: string } = {};
+    const newErrors: typeof errors = {};
 
     if (!fullName.trim()) {
       newErrors.fullName = 'Please enter your full name.';
@@ -75,6 +83,16 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
       newErrors.mobileNumber = 'Please enter your mobile contact number.';
     } else if (mobileNumber.trim().length < 7) {
       newErrors.mobileNumber = 'Please enter a valid telephone or mobile number.';
+    }
+
+    if (!preferredDate) {
+      newErrors.preferredDate = 'Please choose a preferred appointment date.';
+    } else if (preferredDate < getClinicToday()) {
+      newErrors.preferredDate = 'Please choose today or a future date in Cebu time.';
+    }
+
+    if (!preferredTime) {
+      newErrors.preferredTime = 'Please choose a preferred appointment time.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -94,6 +112,8 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
       message,
       preferred_contact_method: preferredContactMethod,
       preferred_timing: preferredTiming,
+      preferred_date: preferredDate,
+      preferred_time: preferredTime,
     });
     setIsSubmitting(false);
     if (!result.ok) {
@@ -111,6 +131,8 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
     setMessage('');
     setPreferredContactMethod('Phone');
     setPreferredTiming('No Preference');
+    setPreferredDate('');
+    setPreferredTime('');
     setErrors({});
     setSubmitError('');
     setIsSubmitted(false);
@@ -367,8 +389,8 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
                     Thank You for Reaching Out.
                   </h3>
                   <p className="text-sm sm:text-base text-[#52453D] leading-relaxed max-w-md mx-auto">
-                    Your consultation request has been received through this website interface. The clinic
-                    can follow up using the contact details you provided to discuss the next step.
+                    Your preferred appointment date and time have been submitted for clinic review. This is a
+                    request, not a confirmed booking; please wait for the clinic to contact you about availability.
                   </p>
                   <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
                     <button
@@ -412,6 +434,50 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="preferred-date" className="block text-xs font-semibold uppercase tracking-wider text-[#2C2420] mb-2">
+                        Preferred Appointment Date <span className="text-[#9E7A42]">*</span>
+                      </label>
+                      <input
+                        id="preferred-date"
+                        type="date"
+                        min={getClinicToday()}
+                        value={preferredDate}
+                        onChange={(e) => {
+                          setPreferredDate(e.target.value);
+                          setErrors((current) => ({ ...current, preferredDate: undefined }));
+                        }}
+                        aria-required="true"
+                        aria-invalid={Boolean(errors.preferredDate)}
+                        aria-describedby={errors.preferredDate ? 'preferred-date-error' : undefined}
+                        className={`w-full px-4 py-3 text-sm bg-[#FAF7F2] border text-[#1D1815] focus:outline-none focus:border-[#9E7A42] transition-colors ${errors.preferredDate ? 'border-[#B85858]' : 'border-[#E7DFD3]'}`}
+                      />
+                      {errors.preferredDate && <p id="preferred-date-error" className="mt-1.5 text-xs text-[#B85858]">{errors.preferredDate}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="preferred-time" className="block text-xs font-semibold uppercase tracking-wider text-[#2C2420] mb-2">
+                        Preferred Appointment Time <span className="text-[#9E7A42]">*</span>
+                      </label>
+                      <input
+                        id="preferred-time"
+                        type="time"
+                        value={preferredTime}
+                        onChange={(e) => {
+                          setPreferredTime(e.target.value);
+                          setErrors((current) => ({ ...current, preferredTime: undefined }));
+                        }}
+                        aria-required="true"
+                        aria-invalid={Boolean(errors.preferredTime)}
+                        aria-describedby={errors.preferredTime ? 'preferred-time-error' : undefined}
+                        className={`w-full px-4 py-3 text-sm bg-[#FAF7F2] border text-[#1D1815] focus:outline-none focus:border-[#9E7A42] transition-colors ${errors.preferredTime ? 'border-[#B85858]' : 'border-[#E7DFD3]'}`}
+                      />
+                      {errors.preferredTime && <p id="preferred-time-error" className="mt-1.5 text-xs text-[#B85858]">{errors.preferredTime}</p>}
+                      <p className="mt-1.5 text-xs text-[#685B52]">Requested times use Cebu time (Asia/Manila) and require clinic confirmation.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Full Name */}
                     <div>
                       <label
@@ -423,6 +489,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
                       <input
                         id="full-name"
                         type="text"
+                        maxLength={120}
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="e.g. Maria Santos"
@@ -451,6 +518,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
                       <input
                         id="mobile-number"
                         type="tel"
+                        maxLength={30}
                         value={mobileNumber}
                         onChange={(e) => setMobileNumber(e.target.value)}
                         placeholder="e.g. 0917 123 4567"
@@ -481,6 +549,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
                       <input
                         id="email-address"
                         type="email"
+                        maxLength={200}
                         value={emailAddress}
                         onChange={(e) => setEmailAddress(e.target.value)}
                         placeholder="e.g. name@example.com"
@@ -527,6 +596,7 @@ export const BookConsultationPage: React.FC<BookConsultationPageProps> = () => {
                     <textarea
                       id="message"
                       rows={3}
+                      maxLength={2000}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Tell us what you'd like to explore, what concerns you have, or what you'd like to understand better."
